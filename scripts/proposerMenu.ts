@@ -1,6 +1,6 @@
 import readline from 'node:readline/promises';
 
-import { proposerOptions } from './utils.js';
+import { proposerOptions } from './utils.ts';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -8,7 +8,7 @@ const rl = readline.createInterface({
 });
 
 try {
-    let index = '';
+    let index: string = '';
 
     while(index != '0'){
         console.log('\n******* On-chain multisig wallet *******\n');
@@ -27,5 +27,9 @@ try {
 
     rl.close();
 } catch (e) {
-    console.error(`⚠️  ${e.message}`);
+    if(e instanceof Error){
+        console.error(`⚠️  ${e.message}`);
+    }else{
+        console.error(`⚠️  ${e}`);
+    }
 }

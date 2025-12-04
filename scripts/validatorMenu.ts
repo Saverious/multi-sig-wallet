@@ -1,6 +1,6 @@
 import readline from 'node:readline/promises';
 
-import { validatorOptions } from './utils.js';
+import { validatorOptions } from './utils.ts';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -28,5 +28,9 @@ try {
 
     rl.close();
 } catch (e) {
-    console.error(`⚠️  ${e.message}`);
+    if(e instanceof Error){
+        console.error(`⚠️  ${e.message}`);
+    }else{
+        console.error(`⚠️  ${e}`);
+    }
 }

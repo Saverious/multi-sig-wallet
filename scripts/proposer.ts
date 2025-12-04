@@ -1,26 +1,46 @@
 import hardhat from 'hardhat';
+import type { Proposer } from '../typechain-types/contracts/Proposer.ts';
 
 const { ethers} = hardhat;
-let proposerAddr = null;
+let proposerAddr: string = '';
 
-export async function deployContract(validatorAddr){
+function setEvents(proposer: Proposer){
+    proposer.on('TransactionSubmitted', (sender: string, recipient: string, value: string, ev: any) => {
+        const trxnLog = {
+            sender: sender,
+            recipient: recipient,
+            value: `${ethers.formatEther(value)} ETH`,
+            trxnHash: ev.log.transactionHash,
+            trxnBlock: ev.log.blockNumber
+        }
+
+        console.log('\n\n🟢🟢🟢 Transaction submitted 🟢🟢🟢\n', trxnLog);
+    });
+}
+
+async function deployContract(validatorAddr: string){
     try {
-        const proposer = await ethers.deployContract('Proposer', [validatorAddr]);
+        const proposer: any = await ethers.deployContract('Proposer', [validatorAddr]);
         await proposer.waitForDeployment();
-
+        
         proposerAddr = await proposer.getAddress();
+        setEvents(proposer);
 
-        console.log('Proposer contract deployed ✅');
+        console.log('✅ Proposer contract deployed');
     } catch (e) {
-        console.error(`⚠️  ${e.message}`);
+        if(e instanceof Error){
+            console.error(`⚠️  ${e.message}`);
+        }else{
+            console.error(`⚠️  ${e}`);
+        }
     }
 }
 
 function proposerExists(){
-    return proposerAddr !== null && proposerAddr !== '';
+    return proposerAddr !== '';
 }
 
-export function viewProposerAddr(){
+function viewProposerAddr(){
     if(!proposerExists()){
         console.log('⚠️  Proposer address not found');
         return;
@@ -29,7 +49,7 @@ export function viewProposerAddr(){
     console.log(`✅ Proposer.address: ${proposerAddr}`);
 }
 
-export async function viewOwner() {
+async function viewOwner() {
     try {
         if(!proposerExists()){
             console.log('⚠️  Cannot find owner. Proposer address not found');
@@ -39,11 +59,15 @@ export async function viewOwner() {
         const proposer = await ethers.getContractAt('Proposer', proposerAddr);
         console.log(`✅ Proposer.owner: ${await proposer.owner()}`);
     } catch (e) {
-        console.error(`⚠️  ${e.message}`);
+        if(e instanceof Error){
+            console.error(`⚠️  ${e.message}`);
+        }else{
+            console.error(`⚠️  ${e}`);
+        }
     }
 }
 
-export async function getTrxn(trxnID) {
+async function getTrxn(trxnID: string) {
     try {
         if(!proposerExists()){
             console.log('⚠️  Cannot get transaction. Proposer address not found');
@@ -67,13 +91,17 @@ export async function getTrxn(trxnID) {
             numOfConfirmations: Number(tx.numOfConfirmations)
         };
 
-        console.log('Transaction found ✅\n', trxn);
+        console.log('✅ Transaction found\n', trxn);
     } catch (e) {
-        console.error(`⚠️  ${e.message}`);
+        if(e instanceof Error){
+            console.error(`⚠️  ${e.message}`);
+        }else{
+            console.error(`⚠️  ${e}`);
+        }
     }
 }
 
-export async function getTrxnCount() {
+async function getTrxnCount() {
     try {
         if(!proposerExists()){
             console.log('⚠️  Cannot get transaction count. Proposer address not found');
@@ -85,11 +113,15 @@ export async function getTrxnCount() {
 
         console.log('Total transactions: ', count);
     } catch (e) {
-        console.error(`⚠️  ${e.message}`);
+        if(e instanceof Error){
+            console.error(`⚠️  ${e.message}`);
+        }else{
+            console.error(`⚠️  ${e}`);
+        }
     }
 }
 
-export async function submitTrxn(recipient, value) {
+async function submitTrxn(recipient: string, value: string) {
     try {
         if(!proposerExists()){
             console.log('⚠️  Cannot submit transaction. Proposer address not found');
@@ -99,8 +131,21 @@ export async function submitTrxn(recipient, value) {
         const proposer = await ethers.getContractAt('Proposer', proposerAddr);
         await proposer.submitTransaction(recipient, ethers.parseEther(value));
 
-        console.log('Transaction submitted ✅');
+        console.log('✅ Request received. Please wait for confirmation');
     } catch (e) {
-        console.error(`⚠️  ${e.message}`);
+        if(e instanceof Error){
+            console.error(`⚠️  ${e.message}`);
+        }else{
+            console.error(`⚠️  ${e}`);
+        }
     }
 }
+
+export const ProposerService = {
+    deployContract,
+    viewProposerAddr,
+    viewOwner,
+    getTrxn,
+    getTrxnCount,
+    submitTrxn
+};

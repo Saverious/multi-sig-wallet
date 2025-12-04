@@ -1,10 +1,11 @@
+import readline from 'node:readline/promises';
 import { isAddress } from 'ethers';
 
-import { deployContract, viewOwner, getTrxn, getTrxnCount, submitTrxn, viewProposerAddr } from './proposer.js';
-import { deployContract as deployVal, viewOwner as viewValOwner, getTrxn as getTrxnVal, getTrxnCount as getTrxnCountVal, confirmTrxn, executeTrxn, viewValidatorAddr } from './validator.js';
+import { ProposerService } from './proposer.ts';
+import { ValidatorService } from './validator.ts';
 
 
-export async function proposerOptions(rl, index) {
+export async function proposerOptions(rl: readline.Interface, index: string) {
     switch(index) {
         case '1': {
             let addr = await rl.question('💬 Validator address: ');
@@ -14,16 +15,16 @@ export async function proposerOptions(rl, index) {
                 return;
             }
 
-            await deployContract(addr);
+            await ProposerService.deployContract(addr);
             break;
         }
 
         case '2':
-            await viewOwner();
+            await ProposerService.viewOwner();
             break;
 
         case '3': {
-            let trxnID = await rl.question('💬 Transaction ID: ');
+            let trxnID: any = await rl.question('💬 Transaction ID: ');
             trxnID = Number.parseInt(trxnID);
 
             if(Number.isNaN(trxnID)){
@@ -31,12 +32,12 @@ export async function proposerOptions(rl, index) {
                 return;
             }
 
-            await getTrxn(trxnID);
+            await ProposerService.getTrxn(trxnID);
             break;
         }
 
         case '4':
-            await getTrxnCount();
+            await ProposerService.getTrxnCount();
             break;
 
         case '5': {
@@ -48,12 +49,12 @@ export async function proposerOptions(rl, index) {
             }
 
             let amount = await rl.question('💬 Amount to send: ');
-            await submitTrxn(recipient, amount);
+            await ProposerService.submitTrxn(recipient, amount);
             break;
         }
 
         case '6':
-            viewProposerAddr();
+            ProposerService.viewProposerAddr();
             break;
 
         default:
@@ -61,7 +62,7 @@ export async function proposerOptions(rl, index) {
     }
 }
 
-export async function validatorOptions(rl, index) {
+export async function validatorOptions(rl: readline.Interface, index: string) {
     switch(index) {
         case '1': {
             let validators = await rl.question('💬 Validator addresses: ');
@@ -74,7 +75,7 @@ export async function validatorOptions(rl, index) {
                 }
             }
 
-            let quota = await rl.question('💬 Validators quota: ');
+            let quota: any = await rl.question('💬 Validators quota: ');
             quota = Number.parseInt(quota);
 
             if(Number.isNaN(quota)){
@@ -82,16 +83,16 @@ export async function validatorOptions(rl, index) {
                 return;
             }
 
-            await deployVal(addresses, quota);
+            await ValidatorService.deployContract(addresses, quota);
             break;
         }
 
         case '2':
-            await viewValOwner();
+            await ValidatorService.viewOwner();
             break;
 
         case '3': {
-            let trxnID = await rl.question('💬 Enter transaction ID: ');
+            let trxnID: any = await rl.question('💬 Enter transaction ID: ');
             trxnID = Number.parseInt(trxnID);
 
             if(Number.isNaN(trxnID)){
@@ -99,16 +100,16 @@ export async function validatorOptions(rl, index) {
                 break;
             }
 
-            await getTrxnVal(trxnID);
+            await ValidatorService.getTrxn(trxnID);
             break;
         }
 
         case '4':
-            await getTrxnCountVal();
+            await ValidatorService.getTrxnCount();
             break;
 
         case '5': {
-            let trxnID = await rl.question('💬 Enter transaction ID: ');
+            let trxnID: any = await rl.question('💬 Enter transaction ID: ');
             trxnID = Number.parseInt(trxnID);
 
             if(Number.isNaN(trxnID)){
@@ -116,7 +117,7 @@ export async function validatorOptions(rl, index) {
                 break;
             }
 
-            let signerID = await rl.question('💬 Signer id: ');
+            let signerID: any = await rl.question('💬 Signer id: ');
             signerID = Number.parseInt(signerID);
 
             if(Number.isNaN(signerID)){
@@ -124,12 +125,12 @@ export async function validatorOptions(rl, index) {
                 break;
             }
 
-            await confirmTrxn(trxnID, signerID);
+            await ValidatorService.confirmTrxn(trxnID, signerID);
             break;
         }
 
         case '6': {
-            let trxnID = await rl.question('💬 Enter transaction ID: ');
+            let trxnID: any = await rl.question('💬 Enter transaction ID: ');
             trxnID = Number.parseInt(trxnID);
 
             if(Number.isNaN(trxnID)){
@@ -137,7 +138,7 @@ export async function validatorOptions(rl, index) {
                 break;
             }
 
-            let signerID = await rl.question('💬 Signer id: ');
+            let signerID: any = await rl.question('💬 Signer id: ');
             signerID = Number.parseInt(signerID);
 
             if(Number.isNaN(signerID)){
@@ -145,12 +146,12 @@ export async function validatorOptions(rl, index) {
                 break;
             }
 
-            await executeTrxn(trxnID, signerID);
+            await ValidatorService.executeTrxn(trxnID, signerID);
             break;
         }
 
         case '7':
-            viewValidatorAddr();
+            ValidatorService.viewValidatorAddr();
             break;
         
         default:
